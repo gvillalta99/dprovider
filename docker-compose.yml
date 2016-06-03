@@ -8,8 +8,9 @@ services:
     build: .
     volumes:
       - .:/app
+    entrypoint: bundle exec
   sidekiq:
-    command: bundle exec sidekiq
+    command: sidekiq
     extends:
       service: rails
     depends_on:
@@ -18,10 +19,17 @@ services:
   web:
     extends:
       service: rails
-    command: bundle exec rails s -p 3000 -b '0.0.0.0'
+    command: rails s -p 3000 -b '0.0.0.0'
     ports:
       - '3000:3000'
     depends_on:
       - postgres
       - redis
       - sidekiq
+  guard:
+    extends:
+      service: rails
+    command: guard -i
+    depends_on:
+      - postgres
+      - redis
