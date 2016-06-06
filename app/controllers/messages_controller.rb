@@ -28,6 +28,7 @@ class MessagesController < ApplicationController
 
     respond_to do |format|
       if @message.save
+        DummyWorker.perform_async(@message.id)
         format.html { redirect_to @message, notice: 'Message was successfully created.' }
         format.json { render :show, status: :created, location: @message }
       else

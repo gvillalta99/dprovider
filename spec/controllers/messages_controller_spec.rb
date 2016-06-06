@@ -1,4 +1,7 @@
 require 'rails_helper'
+require 'sidekiq/testing'
+
+Sidekiq::Testing.fake!
 
 RSpec.describe MessagesController, type: :controller do
 
@@ -51,6 +54,7 @@ RSpec.describe MessagesController, type: :controller do
   end
 
   describe "POST #create" do
+
     context "with valid params" do
       it "creates a new Message" do
         expect {
@@ -67,6 +71,12 @@ RSpec.describe MessagesController, type: :controller do
       it "redirects to the created message" do
         post :create, {:message => valid_attributes}, valid_session
         expect(response).to redirect_to(Message.last)
+      end
+
+      it "enqueues an DummyWorker" do
+        expect do
+          post :create, {message: valid_attributes}, valid_session
+        end.to change(DummyWorker.jobs, :size).by(1)
       end
     end
 
